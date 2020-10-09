@@ -187,13 +187,16 @@ install(FILES
     DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/fastcgi++)
 
 # All the test stuff
-enable_testing()
-foreach(UNITTEST IN LISTS TESTS)
-    add_executable(${UNITTEST}_test EXCLUDE_FROM_ALL tests/${UNITTEST}.cpp)
-    target_link_libraries(${UNITTEST}_test PRIVATE Fastcgipp::fastcgipp)
-    add_test("${UNITTEST}" ${UNITTEST}_test)
-    list(APPEND TEST_TARGET ${UNITTEST}_test)
-endforeach()
+option(FASTCGIPP_TESTS OFF)
+if(FASTCGIPP_TESTS)
+    enable_testing()
+    foreach(UNITTEST IN LISTS TESTS)
+        add_executable(${UNITTEST}_test EXCLUDE_FROM_ALL tests/${UNITTEST}.cpp)
+        target_link_libraries(${UNITTEST}_test PRIVATE Fastcgipp::fastcgipp)
+        add_test("${UNITTEST}" ${UNITTEST}_test)
+        list(APPEND TEST_TARGET ${UNITTEST}_test)
+    endforeach()
+endif(FASTCGIPP_TESTS)
 if(SQL)
     configure_file(
         "${CMAKE_CURRENT_SOURCE_DIR}/tests/sql.sh.in"
@@ -207,12 +210,15 @@ endif(SQL)
 add_custom_target(tests DEPENDS ${TEST_TARGET})
 
 # Examples
-foreach(EXAMPLE IN LISTS EXAMPLES)
-    add_executable(${EXAMPLE}.fcgi EXCLUDE_FROM_ALL examples/${EXAMPLE}.cpp)
-    target_link_libraries(${EXAMPLE}.fcgi PRIVATE Fastcgipp::fastcgipp)
-    list(APPEND EXAMPLE_TARGETS ${EXAMPLE}.fcgi)
-endforeach()
-add_custom_target(examples DEPENDS ${EXAMPLE_TARGETS})
+option(FASTCGIPP_EXAMPLES OFF)
+if(FASTCGIPP_EXAMPLES)
+    foreach(EXAMPLE IN LISTS EXAMPLES)
+        add_executable(${EXAMPLE}.fcgi EXCLUDE_FROM_ALL examples/${EXAMPLE}.cpp)
+        target_link_libraries(${EXAMPLE}.fcgi PRIVATE Fastcgipp::fastcgipp)
+        list(APPEND EXAMPLE_TARGETS ${EXAMPLE}.fcgi)
+    endforeach()
+    add_custom_target(examples DEPENDS ${EXAMPLE_TARGETS})
+endif(FASTCGIPP_EXAMPLES)
 
 # And finally the documentation
 find_package(Doxygen)
